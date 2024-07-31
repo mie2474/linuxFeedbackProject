@@ -70,6 +70,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     ```
     - Create table in MySQL
     ```sql
+    USE linuxPJsolo;
     CREATE TABLE feedback (
         id INT AUTO_INCREMENT PRIMARY KEY,
         first_name VARCHAR(50) NOT NULL,
