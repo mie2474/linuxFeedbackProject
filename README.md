@@ -153,14 +153,14 @@ The Secure Feedback Project is a simple web application for collecting user feed
 
 5. **Set up OKTA Authentication**
     - Follow OKTA documentation to set up a new application.
-        •	Create a Developer OKTA Account
-        •	Login to your Admin Console
-        •	Navigate to **Applications** > **Applications**
-        •	Click Create App Integration
-        •	Choose OIDC - OpenID Connect and Web Application
-        •	Set the Sign-in redirect URIs to `http://localhost:80/callback.php.`
-        •	Set the Sign-out redirect URIs to `http://localhost:80/.`
-        •	Click Save and make note of the **Client ID** and **Client Secret**.
+        -	Create a Developer OKTA Account
+        -	Login to your Admin Console
+        -	Navigate to **Applications** > **Applications**
+        -	Click Create App Integration
+        -	Choose OIDC - OpenID Connect and Web Application
+        -	Set the Sign-in redirect URIs to `http://localhost:80/callback.php.`
+        -	Set the Sign-out redirect URIs to `http://localhost:80/.`
+        -	Click Save and make note of the **Client ID** and **Client Secret**.
     - Configure your application with the provided OKTA client ID and secret in the `/var/www/html` directory
     ```sh
     sudo apt install composer
