@@ -90,6 +90,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     ```
     - Verify that Apache is running by typing `localhost` on your browser
     - A similar image would appear
+
     ![image](image.png)
 
     - To create a simple feedback form, go to the index file at `\var\www\html\index.html` and overwrite with
@@ -126,6 +127,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     <html>
     ```
     - Verify the updated file using by typing `localhost` on your browser
+
     ![Feedback Form](image-1.png)
 
 4. **Configure PHP**
@@ -146,14 +148,35 @@ The Secure Feedback Project is a simple web application for collecting user feed
     ```
     - Verify PHP is running by opening your browser and type `localhost/info.php`
     - You will see something similar to below
+
     ![PHP](image-2.png)
 
 5. **Set up OKTA Authentication**
     - Follow OKTA documentation to set up a new application.
-    - Configure your application with the provided OKTA client ID and secret.
+        •	Create a Developer OKTA Account
+        •	Login to your Admin Console
+        •	Navigate to **Applications** > **Applications**
+        •	Click Create App Integration
+        •	Choose OIDC - OpenID Connect and Web Application
+        •	Set the Sign-in redirect URIs to `http://localhost:80/callback.php.`
+        •	Set the Sign-out redirect URIs to `http://localhost:80/.`
+        •	Click Save and make note of the **Client ID** and **Client Secret**.
+    - Configure your application with the provided OKTA client ID and secret in the `/var/www/html` directory
+    ```sh
+    sudo apt install composer
+    ```
+    - Install JWT Verifier
+    ```sh
+    composer require okta/jwt-verifier
+    ```
+    - Update the `callback.php` file `linuxFeedbackProject/callback.php` to add your token url, clientID, and secret ky
+
 
 6. **Configure ELK Stack and HAProxy**
     - Follow ELK and HAProxy documentation for installation and setup.
+        
+
+
 
 7. **Set up Prometheus**
     - Install Prometheus:
@@ -169,6 +192,48 @@ The Secure Feedback Project is a simple web application for collecting user feed
     sudo cp /etc/prometheus/prometheus.yml /etc/prometheus/prometheus.yml.backup
     sudo vim /etc/prometheus/prometheus.yml
     ```
+    - Creat a Systemd Service
+        - Create Prometheus user
+        ```sh
+        sudo useradd --no-create-home --shell /bin/false prometheus
+        ```
+        - Change ownership of Prometheus File
+        ```sh
+        sudo chown -R prometheus:prometheus /usr/local/prometheus
+        sudo chown -R prometheus:prometheus /etc/prometheus
+        ```
+        - Create a systemd service file
+        ```sh
+        sudo vim /etc/systemd/system/prometheus.service
+        ```
+        - Add the following content to the service file
+        ```sh
+        [Unit]
+        Description=Prometheus
+        Wants=network-online.target
+        After=network-online.target
+
+        [Service]
+        User=prometheus
+        Group=prometheus
+        Type=simple
+        ExecStart=/usr/local/prometheus/prometheus \
+            --config.file=/etc/prometheus/prometheus.yml \
+            --storage.tsdb.path=/var/lib/prometheus/ \
+            --web.console.templates=/usr/local/prometheus/consoles \
+            --web.console.libraries=/usr/local/prometheus/console_libraries
+
+        [Install]
+        WantedBy=multi-user.target
+        ```
+        - Create directory for logging
+        ```sh
+        sudo mkdir -p /var/lib/prometheus
+        sudo chown -R prometheus:prometheus /var/lib/prometheus
+        ```
+
+
+
     - Configure Prometheus to scrape metrics from your application. Edit the Prometheus configuration file (`/etc/prometheus/prometheus.yml`) to include your application endpoint:
     ```yaml
     scrape_configs:
@@ -184,7 +249,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     sudo systemctl status prometheus
     ```
     - Verify on your browser by typing `localhost:9090`
-    - <h2>NOTE:</h2> Always restart Prometheus after updating (`/etc/prometheus/prometheus.yml`) file
+    - **NOTE:** Always restart Prometheus after updating (`/etc/prometheus/prometheus.yml`) file
     ```sh
     sudo systemctl restart prometheus
     ```
