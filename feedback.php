@@ -1,8 +1,8 @@
 <?php
 // Database configuration
 $db_host = 'localhost'; #add your localhost or ip here
-$db_user = 'djbanx'; #add your database username here
-$db_pass = 'djbanX-1'; #Add your database password
+$db_user = 'changeme'; #add your database username here
+$db_pass = 'ChanGeme-1'; #Add your database password
 $db_name = 'linuxPJsolo'; #add your db name
 
 
