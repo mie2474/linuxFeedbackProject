@@ -127,7 +127,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     <body>
     <html>
     ```
-    - Verify the updated file using by typing `localhost` on your browser
+    - Verify the updated file using by typing `localhost` on your browser.
 
     ![Feedback Form](images/image-1.png)
 
@@ -137,7 +137,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     ```sh
     sudo apt install php libapache2-mod-php php-mysql -y
     ```
-    - Create a file <info.php> in `\var\www\html` directory
+    - Create a file <info.php> in `/var/www/html` directory.
     ```sh
     sudo vim /var/www/html/info.php
     ```
@@ -154,12 +154,24 @@ The Secure Feedback Project is a simple web application for collecting user feed
     - Create PHP files to handle OKTA Authentication
         - Create <callback.php> file in the `/var/www/html` directory and past the contents in the file below into it.
         [callback](callback.php)
-        - Create <index.php> file in the `/var/www/html` directory and paste the contents in the file below into it.
+        - Create <index.php> file in the `/var/www/html` directory.
+        ```sh
+        sudo vim /var/www/html/info.php
+        ```
+        - Copy and paste the contents in the file below into it.
         [index](index.php)
     - Create PHP files to handle the form submission and backend
-        - Create <feedback.php> file in the `/var/www/html` directory and paste the contents in the file below into it.
+        - Create <feedback.php> file in the `/var/www/html` directory.
+        ```sh
+        sudo vim /var/www/html/feedback.php
+        ```
+        - Copy and paste the contents in the file below into it.
         [feedback](feedback.php)
-        - Create <feedcount.php> file in the `/var/www/html` directory and paste the contents in the file below into it.
+        - Create <feedcount.php> file in the `/var/www/html` directory.
+        ```sh
+        sudo vim /var/www/html/feedcount.php
+        ```
+        - Copy and paste the contents in the file below into it.
         [feedcount](feedcount.php)
 
 5. **Set up OKTA Authentication**
