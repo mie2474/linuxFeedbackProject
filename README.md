@@ -91,7 +91,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     - Verify that Apache is running by typing `localhost` on your browser
     - A similar image would appear
 
-    ![image](image.png)
+    ![image](images/image.png)
 
     - To create a simple feedback form, go to the index file at `\var\www\html\index.html` and overwrite with
     ```html
@@ -128,7 +128,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     ```
     - Verify the updated file using by typing `localhost` on your browser
 
-    ![Feedback Form](image-1.png)
+    ![Feedback Form](images/image-1.png)
 
 4. **Configure PHP**
     - Ensure PHP is installed and configured correctly.
@@ -149,7 +149,17 @@ The Secure Feedback Project is a simple web application for collecting user feed
     - Verify PHP is running by opening your browser and type `localhost/info.php`
     - You will see something similar to below
 
-    ![PHP](image-2.png)
+    ![PHP](images/image-2.png)
+    - Create PHP files to handle OKTA Authentication
+        - Create <callback.php> file in the `/var/www/html` directory and past the contents in the file below into it.
+        [callback](callback.php)
+        - Create <index.php> file in the `/var/www/html` directory and paste the contents in the file below into it.
+        [index](index.php)
+    - Create PHP files to handle the form submission and backend
+        - Create <feedback.php> file in the `/var/www/html` directory and paste the contents in the file below into it.
+        [feedback](feedback.php)
+        - Create <feedcount.php> file in the `/var/www/html` directory and paste the contents in the file below into it.
+        [feedcount](feedcount.php)
 
 5. **Set up OKTA Authentication**
     - Follow OKTA documentation to set up a new application.
@@ -169,7 +179,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     ```sh
     composer require okta/jwt-verifier
     ```
-    - Update the `callback.php` file `linuxFeedbackProject/callback.php` to add your token url, clientID, and secret ky
+    - Update the `callback.php` file `/var/www/html/callback.php` to add your token url, clientID, and secret key
 
 
 6. **Configure ELK Stack and HAProxy**
@@ -259,17 +269,17 @@ The Secure Feedback Project is a simple web application for collecting user feed
 8. **Set up Grafana**
     - Install Grafana:
     ```sh
-    sudo apt-get install -y software-properties-common
-    sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
-    sudo apt-get update
-    sudo apt-get install grafana
+    sudo apt-get install -y adduser libfontconfig1 musl
+    wget https://dl.grafana.com/enterprise/release/grafana-enterprise_11.1.3_amd64.deb
+    sudo dpkg -i grafana-enterprise_11.1.3_amd64.deb
     ```
     - Start Grafana:
     ```sh
-    sudo systemctl start grafana-server
+    sudo systemctl daemon-reload
     sudo systemctl enable grafana-server
+    sudo systemctl start grafana-server
     ```
-    - Access Grafana at `http://localhost:3000` and log in with the default username (`admin`) and password (`admin`).
+    - Access Grafana at `http://localhost:3000` and log in with the default username (`admin`) and password (`admin`). Change the password if you want
     - Add Prometheus as a data source in Grafana:
       - Go to **Configuration > Data Sources > Add data source**.
       - Select Prometheus and set the URL to `http://localhost:9090`.
@@ -291,7 +301,6 @@ linuxFeedbackProject/
 ├── index.html
 ├── feedback.php
 ├── callback.php
-├── .htaccess
 ├── README.md
 └── sql/
     └── create_feedback_table.sql
