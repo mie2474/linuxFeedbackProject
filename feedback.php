@@ -16,13 +16,13 @@ if ($conn->connect_error) {
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $fname = $conn->real_escape_string($_POST['fname']);
-    $lname = $conn->real_escape_string($_POST['lname']);
+    $first_name = $conn->real_escape_string($_POST['fname']);
+    $last_name = $conn->real_escape_string($_POST['lname']);
     $rating = $conn->real_escape_string($_POST['rating']);
     $comment = $conn->real_escape_string($_POST['comment']);
 
     // Prepare SQL statement to insert data
-    $insert_sql = "INSERT INTO feedbacks (fname, lname, rating, comment) VALUES ('$fname', '$lname', '$rating', '$comment')";
+    $insert_sql = "INSERT INTO feedback (firt_name, last_name, rating, comment) VALUES ('$first_name', '$last_name', '$rating', '$comment')";
 
     if ($conn->query($insert_sql) === TRUE) {
         echo "<h3>Feedback submitted successfully.</h3><br>";
