@@ -94,7 +94,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
 
     ![image](images/image.png)
 
-    - To create a simple feedback form, go to the index file at `/var/www/htmlindex.html` and overwrite with
+    - To create a simple feedback form, go to the index file at `/var/www/html/index.html` and overwrite with
     ```html
     <!DOCTYPE html>
     <html lang="en">
