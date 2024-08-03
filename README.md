@@ -135,7 +135,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     - Ensure PHP is installed and configured correctly.
     - Install necessary PHP extensions:
     ```sh
-    sudo apt install php libapache2-mod-php php-mysql -y
+    sudo apt install php libapache2-mod-php php-mysql php-curl -y
     ```
     - Create a file <info.php> in `/var/www/html` directory.
     ```sh
