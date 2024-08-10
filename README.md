@@ -210,11 +210,9 @@ The Secure Feedback Project is a simple web application for collecting user feed
     - Open a web browser and type in `Loadbalancer-IP` you should see the content of your webserver. Assume this is `Tab A`
     - Open a new tab on your web browser to check the statistics and health of your webservers and type `http://loadbalancer-IP/haproxy?stats` Assume this is `Tab B`
     - You should see something similar.
-    ![LB Statistics](<images/Screenshot 2024-07-31 165823.png>)
+    ![LB Statistics](images/haproxy-stat.png)
     - Refresh `Tab A` several times
     - Go to `Tab B` and check the `app` session `LbTot`
-
-    ![haproxy](<images/Screenshot 2024-07-31 165823.png>)
     - NOTE: Always validate restart HAProxy after modifying the .cfg file
 	```sh
     sudo systemctl restart haproxy
