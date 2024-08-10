@@ -1,16 +1,17 @@
 # linuxFeedbackProject
-Secure Feedback Collection Website
+Secure Feedback Collection Website - This project we use 3 servers (A, B, and C)
 
 
 ## Project Overview
-The Secure Feedback Project is a simple web application for collecting user feedback. It features a feedback form where users can submit their comments, ratings, and personal information. The application uses OKTA for user authentication and employs the ELK stack for monitoring. Load balancing is handled by HAProxy to ensure high availability.
+The Secure Feedback Project is a simple web application for collecting user feedback. It features a feedback form where users can submit their comments, ratings, and personal information. The application uses OKTA for user authentication and employs the ELK stack, Prometheus, and Grafana for monitoring. Load balancing is handled by HAProxy to ensure high availability.
 
 ## Features
 - User authentication via OKTA.
 - Feedback form for submitting first name, last name, rating, and comments.
 - Feedback storage in a MySQL database.
 - Display a confirmation message upon successful submission.
-- Monitoring of application, server, and network using ELK, Prometheus, and Grafana.
+- Monitoring of application, and servers with Prometheus, and Grafana.
+- Monitoring system logs with ELK stack
 - Load balancing using HAProxy.
 
 ## Table of Contents
@@ -19,6 +20,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
 - [Project Structure](#project-structure)
 - [Configuration](#configuration)
 - [Monitoring Setup](#monitoring-setup)
+- [Log Monitoring Setup](#log-monitoring)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -30,6 +32,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
 - PHP
 - OKTA account
 - ELK stack (Elasticsearch, Logstash, Kibana)
+- Node Exporter
 - HAProxy
 - Prometheus
 - Grafana
@@ -42,7 +45,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     cd linuxFeedbackProject
     ```
 
-2. **Set up the Database**
+2. **Set up the Database on Server (A and B)**
 
     - Install MySQL.
     ```sh
@@ -60,17 +63,17 @@ The Secure Feedback Project is a simple web application for collecting user feed
     - Create a database and user:
     ```sql
     CREATE DATABASE linuxPJsolo;
-    CREATE USER 'changeme'@'localhost' IDENTIFIED BY 'ChanGeme-1';
-    GRANT ALL PRIVILEGES ON linuxPJsolo.* TO 'changeme'@'localhost';
+    CREATE USER 'claude'@'localhost' IDENTIFIED BY 'TeamClaude-6';
+    GRANT ALL PRIVILEGES ON linuxPJsolo.* TO 'claude'@'localhost';
     FLUSH PRIVILEGES;
     ```
     - Login to MySql with the new user data, add password when prompted
     ```sh
-    mysql -u changeme -p
+    mysql -u claude -p
     ```
     - Create table in MySQL
     ```sql
-    USE linuxPJsolo;
+    USE feedbackproject;
     CREATE TABLE feedback (
         id INT AUTO_INCREMENT PRIMARY KEY,
         first_name VARCHAR(50) NOT NULL,
@@ -82,7 +85,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     ```
 
 
-3. **Configure Apache**
+3. **Configure Apache on Server (A and B)**
     - Install Apache.
     ```sh
     sudo apt install apache2 -y
@@ -94,44 +97,15 @@ The Secure Feedback Project is a simple web application for collecting user feed
 
     ![image](images/image.png)
 
-    - To create a simple feedback form, go to the index file at `/var/www/html/index.html` and overwrite with
-    ```html
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Feedback Form</title>
-    </head>
-    <body>
-        <h1>Feedback Form</h1>
-        <form action="feedback.php" method="post">
-            <label for="fname">First Name:</label><br>
-            <input type="text" id="fname" name="fname" required><br><br>
-            
-            <label for="lname">Last Name:</label><br>
-            <input type="text" id="lname" name="lname" required><br><br>
-            
-            <label for="rating">Rating:</label><br>
-            <input type="radio" id="rating1" name="rating" value="1" required> 1 - Poor<br>
-            <input type="radio" id="rating2" name="rating" value="2" required> 2 - Fair<br>
-            <input type="radio" id="rating3" name="rating" value="3" required> 3 - Good<br>
-            <input type="radio" id="rating4" name="rating" value="4" required> 4 - Better<br>
-            <input type="radio" id="rating5" name="rating" value="5" required> 5 - Excellent<br><br>
-            
-            <label for="comment">Comment:</label><br>
-            <textarea id="comment" name="comment" rows="4" cols="50" required></textarea><br><br>
-            
-            <input type="submit" value="Submit">
-        </form>
-    <body>
-    <html>
+    - To create a simple feedback form, copy the [index.html](index.html) in the linuxFeedback directory to `/var/www/html`. This will override the default html file.
+    ```sh
+    sudo cp index.html /var/www/html
     ```
     - Verify the updated file using by typing `localhost` on your browser.
 
     ![Feedback Form](images/image-1.png)
 
-4. **Configure PHP**
+4. **Install and Configure PHP on Server (A and B)**
     - Ensure PHP is installed and configured correctly.
     - Install necessary PHP extensions:
     ```sh
@@ -152,54 +126,53 @@ The Secure Feedback Project is a simple web application for collecting user feed
 
     ![PHP](images/image-2.png)
     - Create PHP files to handle OKTA Authentication
-        - Create <callback.php> file in the `/var/www/html` directory and past the contents in the file below into it.
-        [callback](callback.php)
-        - Create <index.php> file in the `/var/www/html` directory.
+        - Copy [callback.php](callback.php) to `/var/www/html` directory. 
         ```sh
-        sudo vim /var/www/html/info.php
+        sudo cp callback.php /var/www/html # callback.php handles response from OKTA after user has successfully logged in.
         ```
-        - Copy and paste the contents in the file below into it.
-        [index](index.php)
-    - Create PHP files to handle the form submission and backend
-        - Create <feedback.php> file in the `/var/www/html` directory.
+        - Copy [index.php](index.php) to `/var/www/html` directory. 
         ```sh
-        sudo vim /var/www/html/feedback.php
+        sudo cp index.php /var/www/html  # index.php serves as entry point of our application. It typically initiates the OKTA authentication process.
         ```
-        - Copy and paste the contents in the file below into it.
-        [feedback](feedback.php)
-        - Create <feedcount.php> file in the `/var/www/html` directory.
+        - Copy [feedback.php](feedback.php) to `/var/www/htl` directory.
         ```sh
-        sudo vim /var/www/html/feedcount.php
+        sudo cp feedback.php /var/www/html # This sends response back to user - feedback successfully submitted
         ```
-        - Copy and paste the contents in the file below into it.
-        [feedcount](feedcount.php)
+        - Copy [feedcount.php](feedcount.php) to `/var/www/htl` directory.
+        ```sh
+        sudo cp feedcount.php /var/www/html # This count the number of feedbacks recieved.
+        ```
 
 5. **Set up OKTA Authentication**
+    - **NOTE: OKTA requires having domain in order to use the developer environmen or use free trial for 30 days**
+    - Click https://www.okta.com/free-trial/ to register.
     - Follow OKTA documentation to set up a new application.
         -	Create a Developer OKTA Account
         -	Login to your Admin Console
         -	Navigate to **Applications** > **Applications**
         -	Click Create App Integration
         -	Choose OIDC - OpenID Connect and Web Application
-        -	Set the Sign-in redirect URIs to `http://localhost:80/callback.php.`
-        -	Set the Sign-out redirect URIs to `http://localhost:80/.`
+        -	Set the Sign-in redirect URIs to `http://serverC-ip:80/callback.php.` # Update this to your loadbacer ip instead of localhost except you are running local VM
+        -	Set the Sign-out redirect URIs to `http://serverC-ip:80/.` #Update this to your loadbacer ip instead of localhost except you are running local VM
         -	Click Save and make note of the **Client ID** and **Client Secret**.
+
     - Configure your application with the provided OKTA client ID and secret in the `/var/www/html` directory
     ```sh
-    sudo apt install composer
+    cd /var/www/html
+    sudo apt install composer # It is required to manage and install necessaru PHP libraries and integrate with third party libraries.
     ```
     - Install JWT Verifier
     ```sh
-    composer require okta/jwt-verifier
+    sudo composer require okta/jwt-verifier # it helps in verifying authentication tokens easily with PHP
     ```
-    - Update the `callback.php` file `/var/www/html/callback.php` to add your token url, clientID, and secret key
+    - Update the `callback.php` file in `/var/www/html/callback.php` to add your token url, clientID, and secret key
 
 
-6. **Configure ELK Stack and HAProxy**
-    - Follow ELK and HAProxy documentation for installation and setup.
+6. **Configure ELK Stack - to be install and configured on serverC**
+    - Follow ELK documentation here [elkproject](elkproject.md)
         
 7. **Configure HAProxy**
-    - Install HAProxy on the Central/Main server
+    - Install HAProxy on the serverC
     ```sh
     sudo apt install haproxy -y
     ```
@@ -214,45 +187,89 @@ The Secure Feedback Project is a simple web application for collecting user feed
             stats uri /haproxy?stats # To check the health and statistics of servers
             default_backend app
 
-    backend static
-            balance roundrobin
-            server  static  127.0.0.1:4331 check
-
     backend app
-            balance         roundrobin # using roundrobin to balance the traffic.
-            server  server1 10.0.0.124:80   check
-            server  server2 10.0.0.58:80    check
-            server  server3 10.0.0.54:80    check
+            balance         roundrobin # using roundrobin to balance the traffic evenly.
+            server  server1 ServerA-ip:80   check # Change the ServerA-ip to your server ip - leave the port at 80 except you changed it.
+            server  server2 ServerB-ip:80   check # Change the ServerA-ip to your server ip - leave the port at 80 except you changed it.
+
     ```
-    - It may look like this   
 
-    ![haproxy](<images/Screenshot 2024-07-31 165823.png>)
-
-    - Validate haproxy.cfg after you modified it.
+    - Validate haproxy.cfg after you modified the `/etc/haproxy/haproxy.cfg`.
     ```sh
     haproxy -c -f /etc/haproxy/haproxy.cfg
     ```
     - You should get the result below. If you have any errors, check you haproxy.cfg file.
 
     ![Haproxy Validation](images/image4.png)
-
+   
     - Start and Enable HAProxy
     ```sh
     sudo systemctl enable haproxy
 	sudo systemctl start haproxy
     ```
+    - Open a web browser and type in `Loadbalancer-IP` you should see the content of your webserver. Assume this is `Tab A`
+    - Open a new tab on your web browser to check the statistics and health of your webservers and type `http://loadbalancer-IP/haproxy?stats` Assume this is `Tab B`
+    - You should see something similar.
+    ![LB Statistics](<images/Screenshot 2024-07-31 165823.png>)
+    - Refresh `Tab A` several times
+    - Go to `Tab B` and check the `app` session `LbTot`
+
+    ![haproxy](<images/Screenshot 2024-07-31 165823.png>)
     - NOTE: Always validate restart HAProxy after modifying the .cfg file
 	```sh
     sudo systemctl restart haproxy
     ```
-    - Open a web browser and type in `localhost` you should see the content of your webserver. Assume this is <Tab A>
-    - Open a new tab on your web browser to check the statistics and health of your webservers and type `http://localhost/haproxy?stats` Assume this is <Tab B>
-    - You should see something similar.
-    ![LB Statistics](<images/Screenshot 2024-07-31 165823.png>)
-    - Refresh <Tab A> several times
-    - Go to <Tab B> and check the `app` session <LbTot>
+    - Refresh `Tab A` several times
+    - Go to `Tab B` and check the `app` session `LbTot`
 
-8. **Set up Prometheus - On the Central/Main Server**
+8. **Set up Node Exporter to scrape matrics - On serverA and ServerB**
+    - Install and configure node exporter
+    ```sh
+    wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
+    ```
+    - Extract the file to the current directory.
+    ```sh
+    tar -xvf node_exporter-1.8.2.linux-amd64.tar.gz
+    ```
+    - Move the Binary to `/usr/local/bin`
+    ```sh
+    sudo mv node_exporter-1.8.2.linux-amd64/node_exporter /usr/local/bin/
+    ```
+    - Create systemd service file
+    ```sh
+    sudo vim /etc/systemd/system/node_exporter.service
+    ```
+    - Add the following
+    ```sh
+    [Unit]
+    Description=Node Exporter
+    Wants=network-online.target
+    After=network-online.target
+
+    [Service]
+    User=node_exporter
+    ExecStart=/usr/local/bin/node_exporter
+
+    [Install]
+    WantedBy=default.target
+    ```
+    - Create a user for node_exporter
+    ```sh
+    sudo useradd -rs /bin/false node_exporter
+    ```
+    - Reload Systemd, Enable, and Start Node Exporter
+    ```sh
+    sudo systemctl daemon-reload
+    sudo systemctl enable node_exporter
+    sudo systemctl start node_exporter
+    ```
+    - Verify Node Exporter is running
+    ```sh
+    sudo systemctl status node_exporter
+    ```
+    - **Note: Node Exporter runs on port 9100**
+
+9. **Set up Prometheus - On serverC**
     - Install Prometheus:
     ```sh
     wget https://github.com/prometheus/prometheus/releases/download/v2.53.1/prometheus-2.53.1.linux-amd64.tar.gz
@@ -264,9 +281,34 @@ The Secure Feedback Project is a simple web application for collecting user feed
     sudo mkdir /etc/prometheus
     sudo mv /usr/local/prometheus/prometheus.yml /etc/prometheus/
     sudo cp /etc/prometheus/prometheus.yml /etc/prometheus/prometheus.yml.backup
-    sudo vim /etc/prometheus/prometheus.yml
+    
     ```
-    - Creat a Systemd Service
+    
+    - Create a Systemd Service
+        - Create a systemd service file
+        ```sh
+        sudo vim /etc/systemd/system/prometheus.service
+        ```
+        - Add the following content to the service file
+            ```sh
+            [Unit]
+            Description=Prometheus
+            Wants=network-online.target
+            After=network-online.target
+
+            [Service]
+            User=prometheus
+            Group=prometheus
+            Type=simple
+            ExecStart=/usr/local/prometheus/prometheus \
+                --config.file=/etc/prometheus/prometheus.yml \
+                --storage.tsdb.path=/var/lib/prometheus/ \
+                --web.console.templates=/usr/local/prometheus/consoles \
+                --web.console.libraries=/usr/local/prometheus/console_libraries
+
+            [Install]
+            WantedBy=multi-user.target
+            ```
         - Create Prometheus user
         ```sh
         sudo useradd --no-create-home --shell /bin/false prometheus
@@ -276,30 +318,8 @@ The Secure Feedback Project is a simple web application for collecting user feed
         sudo chown -R prometheus:prometheus /usr/local/prometheus
         sudo chown -R prometheus:prometheus /etc/prometheus
         ```
-        - Create a systemd service file
-        ```sh
-        sudo vim /etc/systemd/system/prometheus.service
-        ```
-        - Add the following content to the service file
-        ```sh
-        [Unit]
-        Description=Prometheus
-        Wants=network-online.target
-        After=network-online.target
-
-        [Service]
-        User=prometheus
-        Group=prometheus
-        Type=simple
-        ExecStart=/usr/local/prometheus/prometheus \
-            --config.file=/etc/prometheus/prometheus.yml \
-            --storage.tsdb.path=/var/lib/prometheus/ \
-            --web.console.templates=/usr/local/prometheus/consoles \
-            --web.console.libraries=/usr/local/prometheus/console_libraries
-
-        [Install]
-        WantedBy=multi-user.target
-        ```
+        
+        
         - Create directory for logging
         ```sh
         sudo mkdir -p /var/lib/prometheus
@@ -307,12 +327,16 @@ The Secure Feedback Project is a simple web application for collecting user feed
         ```
 
     - Configure Prometheus to scrape metrics from your application. Edit the Prometheus configuration file (`/etc/prometheus/prometheus.yml`) to include your application endpoint:
-    ```yaml
-    scrape_configs:
-      - job_name: 'linux_feedback_project'
-        static_configs:
-          - targets: ['localhost:9090'] # Add as many server - Ensure the servers have node exporter running on each. -targerts: ['localhost:9090','serverA:9100','serverb:9100']
     ```
+    sudo vim /etc/prometheus/prometheus.yml
+    ```
+    - Update the target - add serverA-ip and serverB-ip
+        ```yaml
+        scrape_configs:
+        - job_name: 'linux_feedback_project'
+            static_configs:
+            - targets: ['localhost:9090', 'serverA:9100','serverB:9100] # Add as many server - Ensure the servers have node exporter running on each. -targerts: ['localhost:9090','serverA:9100','serverb:9100']
+        ```
     - Start Prometheus
     ```sh
     sudo systemctl daemon-reload 
@@ -320,7 +344,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     sudo systemctl start prometheus
     sudo systemctl status prometheus
     ```
-    - Verify on your browser by typing `localhost:9090`
+    - Verify on your browser by typing `http://serverC-ip:9090`
     - **NOTE:** Always restart Prometheus after updating (`/etc/prometheus/prometheus.yml`) file
     ```sh
     sudo systemctl restart prometheus
@@ -328,7 +352,7 @@ The Secure Feedback Project is a simple web application for collecting user feed
     - Verify the targets are added and running by navigating Click `Status` --> `Targets`
     ![Promethues](images/image-3.png)
 
-9. **Set up Grafana - On Centra/Main Sever**
+10. **Set up Grafana - On serverC**
     - Install Grafana:
     ```sh
     sudo apt-get install -y adduser libfontconfig1 musl
@@ -341,10 +365,10 @@ The Secure Feedback Project is a simple web application for collecting user feed
     sudo systemctl enable grafana-server
     sudo systemctl start grafana-server
     ```
-    - Access Grafana at `http://localhost:3000` and log in with the default username (`admin`) and password (`admin`). Change the password if you want
+    - Access Grafana at `http://serverC-ip:3000` and log in with the default username (`admin`) and password (`admin`). Change the password if you want
     - Add Prometheus as a data source in Grafana:
       - Go to **Configuration > Data Sources > Add data source**.
-      - Select Prometheus and set the URL to `http://localhost:9090`.
+      - Select Prometheus and set the URL to `http://serverC:9090`.
       - Click `Save & Test` you should get a message like below
       ![Grafana Save & Test](images/image-5.png)
       - Use Grafana to create dashboards to visualize the performance metrics in real-time.
@@ -355,16 +379,23 @@ The Secure Feedback Project is a simple web application for collecting user feed
         - A dashboard like below should appear
         ![Grafana Dash](images/image-6.png)
 
-## Usage
-1. **Run the Application**
-    - Start the Apache server:
-    ```sh
-    sudo systemctl start apache2
-    ```
-    - Access the application at `http://localhost`.
+## Workflow diagram
+![Process-Diagram](images/Untitled%20Diagram.drawio.png)
 
+## Usage
+1. **Accessing the Application**
+    - The application is accessible through Server C `http://serverC-ip`.
+    - When you navigate to the HAProxy IP in your browser, it will open index.php for OKTA authentication.
+    
 2. **Submit Feedback**
     - Navigate to the feedback form, authenticate using OKTA, and submit your feedback.
+    - Users can submit feedback through the form hosted on Servers A and B.
+    - Once submitted, the feedback is stored in the database, and a confirmation message is displayed.
+
+3. **Monitoring with Prometheus and Grafana**
+    - Visit the Grafana web interface (typically http://Server_C_IP:3000)
+    - View the dashboards to monitor the application's performance, server health, and network metrics.
+    - Once submitted, the feedback is stored in the database, and a confirmation message is displayed.
 
 ## Project Structure
 ```plaintext
@@ -374,4 +405,6 @@ linuxFeedbackProject/
 ├── callback.php
 ├── README.md
 ├── feedcount.php
+├── elkproject.md
+├── schema.sql
 └── index.php

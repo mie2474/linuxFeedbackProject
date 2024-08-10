@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Form</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+            margin: 0;
+        }
+
+        .form-container {
+            background-color: #062d57;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .rating-group {
+            display: block;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .rating-group input[type="radio"] {
+            margin-right: 5px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input[type="submit"] {
+            background-color: #062d57;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Feedback Form</h1>
+        <form action="feedback.php" method="post">
+            <label for="fname">First Name:</label>
+            <input type="text" id="fname" name="fname" required>
+
+            <label for="lname">Last Name:</label>
+            <input type="text" id="lname" name="lname" required>
+
+            <label for="rating">Rating:</label>
+            <div class="rating-group">
+            <input type="radio" id="rating1" name="rating" value="1" required> 1 - Poor
+            <input type="radio" id="rating2" name="rating" value="2" required> 2 - Fair
+            <input type="radio" id="rating3" name="rating" value="3" required> 3 - Good
+            <input type="radio" id="rating4" name="rating" value="4" required> 4 - Better
+            <input type="radio" id="rating5" name="rating" value="5" required> 5 - Excellent
+            </div>
+
+            <label for="comment">Comment:</label>
+            <textarea id="comment" name="comment" rows="4" cols="50" required></textarea>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+</html>

@@ -1,15 +1,24 @@
 <?php
 session_start();
+require 'vendor/autoload.php';
 
-$authorize_url = 'https://dev-94271413.okta.com/oauth2/default/v1/authorize'; #change this and add your url token here
-$client_id = ''; #Add your client ID here
-$redirect_uri = 'http://localhost:80/callback.php';
-$scope = 'openid profile email';
-$state = bin2hex(random_bytes(5));
-$_SESSION['state'] = $state;
+$client_id = '0oail44lnqcBE9uMB5d7';
+$redirect_uri = 'http://34.136.141.61:80/callback.php';
+$okta_domain = 'https://dev-94271413.okta.com';
 
-$auth_url = $authorize_url . '?client_id=' . $client_id . '&redirect_uri=' . urlencode($redirect_uri) . '&scope=' . urlencode($scope) . '&response_type=code&state=' . $state;
+if (!isset($_SESSION['user'])) {
+    $auth_url = $okta_domain . '/oauth2/default/v1/authorize?' . http_build_query([
+        'client_id' => $client_id,
+        'redirect_uri' => $redirect_uri,
+        'response_type' => 'code',
+        'scope' => 'openid profile email',
+        'state' => bin2hex(random_bytes(5))
+    ]);
+    header('Location: ' . $auth_url);
+    exit();
+}
 
-header('Location: ' . $auth_url);
-exit;
+// Serve the index.html content after authentication
+readfile('index.html');
+?>
 

@@ -1,43 +1,40 @@
 <?php
 session_start();
-if (!isset($_GET['state']) || ($_GET['state'] !== $_SESSION['state'])) {
-    die('State mismatch or missing');
+require 'vendor/autoload.php';
+
+$client_id = '0oail44lnqcBE9uMB5d7';
+$client_secret = '2Yr3A7FeadkfZbwjT1cEGvBLzqcpAhE88fNb6CI3F23hrtuvDNLEa0xxhR1p_D-p';
+$redirect_uri = 'http://34.136.141.61:80/callback.php';
+$okta_domain = 'https://dev-94271413.okta.com';
+
+if (!isset($_GET['code'])) {
+    exit('Authorization code not received');
 }
 
-$code = $_GET['code'];
-$token_url = 'https://dev-94271413.okta.com/oauth2/default/v1/token'; #change this and add your url token here
-$client_id = ''; #Add client ID here
-$client_secret = ''; #Add client secret here
-$redirect_uri = 'http://localhost:80/callback.php';
+$token_url = $okta_domain . '/oauth2/default/v1/token';
 
-$post_data = [
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $token_url);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
     'grant_type' => 'authorization_code',
-    'code' => $code,
+    'code' => $_GET['code'],
     'redirect_uri' => $redirect_uri,
     'client_id' => $client_id,
     'client_secret' => $client_secret
-];
+]));
 
-$curl = curl_init();
-curl_setopt($curl, CURLOPT_URL, $token_url);
-curl_setopt($curl, CURLOPT_POST, true);
-curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($post_data));
-curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($curl, CURLOPT_HTTPHEADER, [
-    'Accept: application/json',
-    'Content-Type: application/x-www-form-urlencoded'
-]);
+$response = curl_exec($ch);
+curl_close($ch);
 
-$response = curl_exec($curl);
-curl_close($curl);
+$token = json_decode($response, true);
 
-$token_response = json_decode($response, true);
-
-if (isset($token_response['access_token'])) {
-    $_SESSION['access_token'] = $token_response['access_token'];
-    header('Location: index.html');
-    exit;
+if (isset($token['access_token'])) {
+    $_SESSION['user'] = $token;
+    header('Location: index.php');
+    exit();
 } else {
-    echo 'Error retrieving access token';
+    exit('Error fetching access token');
 }
-
+?>

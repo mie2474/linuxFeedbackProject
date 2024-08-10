@@ -1,9 +1,9 @@
  <?php
 // Database configuration
 $db_host = 'localhost'; #add your localhost or ip here
-$db_user = 'changeme'; #add your database username here
-$db_pass = 'ChanGeme-1'; #Add your database password
-$db_name = 'linuxPJsolo'; #add your db name
+$db_user = 'claude'; #add your database username here
+$db_pass = 'TeamClaude-6'; #Add your database password
+$db_name = 'feedbackproject'; #add your db name
 
 // Connect to MySQL database
 $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
@@ -30,4 +30,3 @@ echo "No feedbacks yet.";
 // Close database connection
 $conn->close();
 ?>
-

@@ -1,0 +1,8 @@
+CREATE TABLE feedback (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    rating INT NOT NULL,
+    comment TEXT NOT NULL,
+   entered_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
